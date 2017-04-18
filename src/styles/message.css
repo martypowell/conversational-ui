@@ -1,0 +1,15 @@
+.message {
+    text-align: left;
+    margin-bottom: 15px;
+}
+.message .text {
+    border: 1px solid lightgray;
+    border-radius: 10px;
+    padding: 5px 10px;
+}
+.message .avatar {
+    margin-right: 10px;
+}
+.message * {
+    display: inline-block;
+}

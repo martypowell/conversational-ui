@@ -10,30 +10,30 @@ class ConversationComponent extends Component {
             messages: this.props.messages,
             answers: {},
             log: [],
-            loadingMessage: false
+            isLoading: false
         }
     }
 
     nextMessage() {
-        this.setState({
-            loadingMessage: true
-        })
-
         if (this.state.activeMessageNumber < this.state.messages.length) {
-            let activeMessage = this.state.messages[this.state.activeMessageNumber];
-            let isMessageOnly = !activeMessage.hasOwnProperty('key');
-            
-            console.log(activeMessage, isMessageOnly)
-
-            this.state.log.push(activeMessage);
-
             this.setState({
-                activeMessageNumber: this.state.activeMessageNumber++
-            });
+                isLoading: true
+            })
 
-            if (isMessageOnly) {
-                this.nextMessage();
-            }
+            setTimeout(() => {
+                let activeMessage = this.state.messages[this.state.activeMessageNumber];
+                let isMessageOnly = !activeMessage.hasOwnProperty('key');
+
+                this.setState({
+                    activeMessageNumber: this.state.activeMessageNumber + 1,
+                    isLoading: false,
+                    log: this.state.log.concat(activeMessage)
+                })
+
+                if (isMessageOnly) {
+                    this.nextMessage();
+                }
+            }, 1500);
         }
         else {
             this.state.log.push({
@@ -57,6 +57,9 @@ class ConversationComponent extends Component {
             <div className="container">
                 <div className="conversation">
                     <section className="conversation-body">
+                        {this.state.isLoading &&
+                            <p>Loading</p>
+                        }
                         {this.state.log.map((message, index) => {
                             return <Message 
                                         key={index}

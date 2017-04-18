@@ -2,6 +2,9 @@
     text-align: left;
     margin-bottom: 15px;
 }
+.message--human {
+    text-align: right;
+}
 .message .text {
     border: 1px solid lightgray;
     border-radius: 10px;

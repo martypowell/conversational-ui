@@ -1,20 +1,63 @@
 import React, { Component } from 'react';
 import '../styles/conversation.css';
-import Message from '../components/message'
+import Message from '../components/message';
+import SubmitButton from '../components/submit-button';
+import UserInput from '../components/user-input';
 
 class ConversationComponent extends Component {
     constructor(props) {
         super(props);
         this.state = {
             activeMessageNumber: 0,
+            activeMessage: {},
             messages: this.props.messages,
             answers: {},
             log: [],
-            isLoading: false
+            isLoading: false,
+            userInput: '',
+            disableUserInput: true
         }
     }
 
-    nextMessage() {
+    handleUserInput(e) {
+        e.preventDefault();
+        this.setState({
+            userInput: e.target.value,
+        });
+    };
+
+    handleButtonSelect(select) {
+
+    }
+
+    submitUserInput(e) {
+        e.preventDefault();
+        if (this.state.userInput.length > 0) {
+            var answers = this.state.answers;
+            var activeMessage = this.state.activeMessage;
+            var userMessage = {
+                text: this.state.userInput,
+                sender: 'human'
+            }
+
+           answers[activeMessage.key] = this.state.userInput;
+
+           //TODO: Refactor
+           var userInput = {};
+           userInput[activeMessage.key] = this.state.userInput;
+
+            this.setState({
+                answers: answers,
+                userInput: '',
+                disableUserInput: true,
+                log: this.state.log.concat(userMessage)
+            });
+
+            this.nextMessage(userInput);
+        }
+    };
+
+    nextMessage(userInput) {
         if (this.state.activeMessageNumber < this.state.messages.length) {
             this.setState({
                 isLoading: true
@@ -22,18 +65,34 @@ class ConversationComponent extends Component {
 
             setTimeout(() => {
                 let activeMessage = this.state.messages[this.state.activeMessageNumber];
-                let isMessageOnly = !activeMessage.hasOwnProperty('key');
+                let isQuestion = activeMessage.hasOwnProperty('key');
+
+                if (userInput && activeMessage.text.indexOf("{") > -1 && activeMessage.text.indexOf("}") > -1) {
+                    var userInputKey = Object.keys(userInput)[0];
+                    var textToReplace = ["{", userInputKey ,"}"].join("");
+                    activeMessage.text = activeMessage.text.replace(textToReplace, userInput[userInputKey].toString())
+                }
 
                 this.setState({
+                    activeMessage: activeMessage,
                     activeMessageNumber: this.state.activeMessageNumber + 1,
                     isLoading: false,
                     log: this.state.log.concat(activeMessage)
                 })
 
-                if (isMessageOnly) {
+                if (isQuestion && activeMessage.fieldType === 'text') {
+                    this.setState({
+                        disableUserInput: false
+                    })
+                    this.userInput.focus();
+                }
+                else if (isQuestion && activeMessage.fieldType === 'text') {
+
+                }
+                else {
                     this.nextMessage();
                 }
-            }, 1500);
+            }, 500);
         }
         else {
             this.state.log.push({
@@ -53,6 +112,8 @@ class ConversationComponent extends Component {
     }
 
     render() {
+        const { userInput, disableUserInput } = this.state;
+
         return (
             <div className="container">
                 <div className="conversation">
@@ -68,8 +129,16 @@ class ConversationComponent extends Component {
                     </section>
                     <footer className="footer">
                         <div className="input-container">
-                            <input type="textarea" name="user-input" className="user-input" />
-                            <i className="fa fa-2x fa-caret-square-o-right send-btn" aria-hidden="true"></i>
+                            <form onSubmit={e => this.submitUserInput(e)}>
+                                <UserInput
+                                    type="text"
+                                    value={userInput}
+                                    innerRef={input => this.userInput = input }
+                                    onChange={e => this.handleUserInput(e)}
+                                    disabled={disableUserInput}
+                                    />
+                                <SubmitButton>↩</SubmitButton>
+                            </form>
                         </div>
                     </footer>
                 </div>

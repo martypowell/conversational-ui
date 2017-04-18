@@ -4,12 +4,12 @@ import '../styles/message.css';
 class HumanMessageComponent extends Component {
     render() {
         return (
-            <div className="message">
-                <div className="avatar">
-                    avatar
-                </div>
+            <div className="message message--human">
                 <div className="text">
                     {this.props.message.text}
+                </div>
+                <div className="avatar">
+                    avatar
                 </div>
             </div>
         );

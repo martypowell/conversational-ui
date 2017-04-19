@@ -5,9 +5,10 @@ import BotMessage from './bot-message';
 import HumanMessage from './human-message';
 import AnswerButton from '../components/answer-button';
 
-function Message(message) {
+function Message(message, props) {
     const isSystemMessage = message.sender === 'system';
     const isHumanMessage = !isSystemMessage && message.sender !== 'bot';
+
     if (isSystemMessage) {
         return <SystemMessage message={message} />;
     }
@@ -21,11 +22,13 @@ function Message(message) {
             return (
                 <div>
                     <BotMessage message={message} />
-                    {message.options.map((button, index) =>
-                        <AnswerButton key={index} onClick={() => this.props.onButtonSelect(button)}>
-                            {button.text}
-                        </AnswerButton>
-                    )}
+                    <div className="message--human">
+                        {message.options.map((button, index) =>
+                            <AnswerButton key={index} onClick={() => props.onButtonSelect(button)}>
+                                {button.text}
+                            </AnswerButton>
+                        )}
+                    </div>
                 </div>
             )
         }
@@ -39,7 +42,7 @@ function Message(message) {
 class MessageComponent extends Component {
     render() {
         return (
-            Message(this.props.message)
+            Message(this.props.message, this.props)
         );
     }
 }

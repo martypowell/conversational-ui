@@ -4,13 +4,38 @@ import Message from '../components/message';
 import SubmitButton from '../components/submit-button';
 import UserInput from '../components/user-input';
 
+var generateTemplateString = (function(){
+    var cache = {};
+    function generateTemplate(template){
+    var fn = cache[template];
+    if (!fn){
+    // Replace ${expressions} (etc) with ${map.expressions}.
+    var sanitized = template
+        .replace(/\$\{([\s]*[^;\s\{]+[\s]*)\}/g, function(_, match){
+            return `\$\{map.${match.trim()}\}`;
+            })
+        // Afterwards, replace anything that's not ${map.expressions}' (etc) with a blank string.
+        .replace(/(\$\{(?!map\.)[^}]+\})/g, '');
+    fn = Function('map', `return \`${sanitized}\``);
+    }
+    return fn;
+};
+
+return generateTemplate;
+})();
+
+
 class ConversationComponent extends Component {
     constructor(props) {
         super(props);
-        this.state = {
+        this.state = this.getInitialState();
+        this.state.messages = this.props.messages;
+    }
+
+    getInitialState = () => {
+        return {
             activeMessageNumber: 0,
             activeMessage: {},
-            messages: this.props.messages,
             answers: {},
             log: [],
             isLoading: false,
@@ -26,10 +51,34 @@ class ConversationComponent extends Component {
         });
     };
 
-    handleButtonSelect(select) {
+    //This syntax is required to associate this method to the Conversation Component
+    //Otherwise the MessageComponent will be the scope and the Conversation state won't be available
+    //See https://babeljs.io/blog/2015/06/07/react-on-es6-plus
+    handleButtonSelect = (select) => {
+            var answers = this.state.answers;
+            var activeMessage = this.state.activeMessage;
+            var userMessage = {
+                text: select.text,
+                sender: 'human'
+            };
 
-    }
+           answers[activeMessage.key] = select.value;
 
+           //TODO: Refactor
+           var userInput = {};
+           userInput[activeMessage.key] = select.text;
+
+            this.setState({
+                answers: answers,
+                userInput: '',
+                disableUserInput: true,
+                log: this.state.log.concat(userMessage)
+            });
+
+            this.nextMessage(userInput);
+    };
+
+    
     submitUserInput(e) {
         e.preventDefault();
         if (this.state.userInput.length > 0) {
@@ -57,7 +106,19 @@ class ConversationComponent extends Component {
         }
     };
 
-    nextMessage(userInput) {
+
+    parseMessage(messageText) {
+        let answers = this.state.answers;
+        let template = generateTemplateString(messageText);
+        return template(answers);
+    };
+
+    restartChat = () => {
+        this.setState(this.getInitialState());
+        this.startChat();
+    }
+
+    nextMessage() {
         if (this.state.activeMessageNumber < this.state.messages.length) {
             this.setState({
                 isLoading: true
@@ -66,16 +127,30 @@ class ConversationComponent extends Component {
             setTimeout(() => {
                 let activeMessage = this.state.messages[this.state.activeMessageNumber];
                 let isQuestion = activeMessage.hasOwnProperty('key');
+                let nextStep = this.state.activeMessageNumber + 1;
 
-                if (userInput && activeMessage.text.indexOf("{") > -1 && activeMessage.text.indexOf("}") > -1) {
-                    var userInputKey = Object.keys(userInput)[0];
-                    var textToReplace = ["{", userInputKey ,"}"].join("");
-                    activeMessage.text = activeMessage.text.replace(textToReplace, userInput[userInputKey].toString())
+                if (typeof activeMessage.text === 'string') {
+                    activeMessage.text = this.parseMessage(activeMessage.text);
+                }
+                else {
+                    let targetField = activeMessage.key;
+                    let targetValue = this.state.answers[targetField].toLowerCase();
+                    let messageText = activeMessage.text["default"];
+
+                    if (activeMessage.text.hasOwnProperty(targetValue)) {
+                        messageText = activeMessage.text[targetValue];
+                    }
+                    
+                    activeMessage.text = this.parseMessage(messageText.message);
+
+                    if (messageText.hasOwnProperty('nextStep')) {
+                        nextStep = messageText.nextStep - 1;
+                    }
                 }
 
                 this.setState({
                     activeMessage: activeMessage,
-                    activeMessageNumber: this.state.activeMessageNumber + 1,
+                    activeMessageNumber: nextStep,
                     isLoading: false,
                     log: this.state.log.concat(activeMessage)
                 })
@@ -86,11 +161,13 @@ class ConversationComponent extends Component {
                     })
                     this.userInput.focus();
                 }
-                else if (isQuestion && activeMessage.fieldType === 'text') {
+                else if (isQuestion && activeMessage.fieldType === 'radio') {
 
                 }
                 else {
-                    this.nextMessage();
+                    if (!activeMessage.isLastMessage) {
+                        this.nextMessage();
+                    }
                 }
             }, 500);
         }
@@ -103,7 +180,7 @@ class ConversationComponent extends Component {
         
     }
 
-    componentWillMount() {
+    startChat() {
         this.state.log.push({
             text: "Chat Started at " + new Date().toString(),
             sender: "system"
@@ -111,12 +188,17 @@ class ConversationComponent extends Component {
         this.nextMessage();
     }
 
+    componentWillMount() {
+        this.startChat();
+    }
+
     render() {
         const { userInput, disableUserInput } = this.state;
 
         return (
             <div className="container">
-                <div className="conversation">
+                <button onClick={this.restartChat}>Restart Chat</button>
+                <section className="conversation">
                     <section className="conversation-body">
                         {this.state.isLoading &&
                             <p>Loading</p>
@@ -124,7 +206,8 @@ class ConversationComponent extends Component {
                         {this.state.log.map((message, index) => {
                             return <Message 
                                         key={index}
-                                        message={message} />
+                                        message={message}
+                                        onButtonSelect={this.handleButtonSelect} />
                         })}
                     </section>
                     <footer className="footer">
@@ -141,7 +224,7 @@ class ConversationComponent extends Component {
                             </form>
                         </div>
                     </footer>
-                </div>
+                </section>
             </div>
         );
     }

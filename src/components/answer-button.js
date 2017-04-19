@@ -2,13 +2,12 @@ import styled from 'styled-components';
 
 const AnswerButton = styled.button`
   display: inline-block;
-  border: 1px solid ${props => props.theme.userBlobColor};
-  padding: .5rem 1rem;
+  border: 1px solid lightgray;
+  padding: 10px;
   font-weight: 200;
   color: #222;
-  font-size: .8rem;
   background: none;
-  border-radius: 1.5rem;
+  border-radius: 10px;
   transition: background 100ms;
   cursor: pointer;
   margin-right: .5rem;
@@ -16,7 +15,7 @@ const AnswerButton = styled.button`
   &:focus,
   &:hover {
     outline: 0;
-    background: ${props => props.theme.userBlobColor};
+    background: gray;
     color: #fff;
   }
 `;

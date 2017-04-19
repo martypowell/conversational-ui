@@ -25,6 +25,7 @@ return generateTemplate;
 })();
 
 
+
 class ConversationComponent extends Component {
     constructor(props) {
         super(props);
@@ -33,6 +34,7 @@ class ConversationComponent extends Component {
     }
 
     getInitialState = () => {
+        console.log('got here')
         return {
             activeMessageNumber: 0,
             activeMessage: {},
@@ -41,10 +43,10 @@ class ConversationComponent extends Component {
             isLoading: false,
             userInput: '',
             disableUserInput: true
-        }
+        };
     }
 
-    handleUserInput(e) {
+    handleUserInput = (e) => {
         e.preventDefault();
         this.setState({
             userInput: e.target.value,
@@ -79,10 +81,11 @@ class ConversationComponent extends Component {
     };
 
     
-    submitUserInput(e) {
+    submitUserInput = (e) => {
         e.preventDefault();
         if (this.state.userInput.length > 0) {
             var answers = this.state.answers;
+
             var activeMessage = this.state.activeMessage;
             var userMessage = {
                 text: this.state.userInput,
@@ -91,10 +94,6 @@ class ConversationComponent extends Component {
 
            answers[activeMessage.key] = this.state.userInput;
 
-           //TODO: Refactor
-           var userInput = {};
-           userInput[activeMessage.key] = this.state.userInput;
-
             this.setState({
                 answers: answers,
                 userInput: '',
@@ -102,30 +101,34 @@ class ConversationComponent extends Component {
                 log: this.state.log.concat(userMessage)
             });
 
-            this.nextMessage(userInput);
+            this.nextMessage();
         }
     };
 
 
-    parseMessage(messageText) {
+    parseMessage = (messageText) => {
         let answers = this.state.answers;
         let template = generateTemplateString(messageText);
         return template(answers);
     };
 
     restartChat = () => {
-        this.setState(this.getInitialState());
-        this.startChat();
-    }
+        var initialState = this.getInitialState();
+        this.setState(initialState, () => {
+            this.startChat();
 
-    nextMessage() {
+            console.log(this.state)
+        });
+    };
+
+    nextMessage = () => {
         if (this.state.activeMessageNumber < this.state.messages.length) {
             this.setState({
                 isLoading: true
             })
 
             setTimeout(() => {
-                let activeMessage = this.state.messages[this.state.activeMessageNumber];
+                let activeMessage = Object.assign({}, this.state.messages[this.state.activeMessageNumber]);
                 let isQuestion = activeMessage.hasOwnProperty('key');
                 let nextStep = this.state.activeMessageNumber + 1;
 

@@ -116,8 +116,6 @@ class ConversationComponent extends Component {
         var initialState = this.getInitialState();
         this.setState(initialState, () => {
             this.startChat();
-
-            console.log(this.state)
         });
     };
 

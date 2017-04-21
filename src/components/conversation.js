@@ -68,7 +68,9 @@ class ConversationComponent extends Component {
            userInput[activeMessage.key] = select.text;
         
            var convoLog = this.state.log.slice();
-           convoLog.splice(-1, 1); //Remove the input message from the log
+           
+           convoLog[convoLog.length - 1].isAnswered = true;
+           
            convoLog.push(userMessage); //Add the users' answer
 
             this.setState({

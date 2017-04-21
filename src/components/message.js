@@ -22,13 +22,15 @@ function Message(message, props) {
             return (
                 <div>
                     <BotMessage message={message} />
-                    <div className="message--human">
-                        {message.options.map((button, index) =>
-                            <AnswerButton key={index} onClick={() => props.onButtonSelect(button)}>
-                                {button.text}
-                            </AnswerButton>
-                        )}
-                    </div>
+                    {!message.isAnswered &&
+                        <div className="message--human">
+                            {message.options.map((button, index) =>
+                                <AnswerButton key={index} onClick={() => props.onButtonSelect(button)}>
+                                    {button.text}
+                                </AnswerButton>
+                            )}
+                        </div>
+                    }
                 </div>
             )
         }

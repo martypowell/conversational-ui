@@ -3,6 +3,7 @@ import '../styles/conversation.css';
 import Message from '../components/message';
 import SubmitButton from '../components/submit-button';
 import UserInput from '../components/user-input';
+import MessageLoading from '../components/message-loading';
 
 var generateTemplateString = (function(){
     var cache = {};
@@ -20,11 +21,8 @@ var generateTemplateString = (function(){
     }
     return fn;
 };
-
 return generateTemplate;
 })();
-
-
 
 class ConversationComponent extends Component {
     constructor(props) {
@@ -34,7 +32,6 @@ class ConversationComponent extends Component {
     }
 
     getInitialState = () => {
-        console.log('got here')
         return {
             activeMessageNumber: 0,
             activeMessage: {},
@@ -69,7 +66,7 @@ class ConversationComponent extends Component {
            //TODO: Refactor
            var userInput = {};
            userInput[activeMessage.key] = select.text;
-
+        
            var convoLog = this.state.log.slice();
            convoLog.splice(-1, 1); //Remove the input message from the log
            convoLog.push(userMessage); //Add the users' answer
@@ -109,7 +106,6 @@ class ConversationComponent extends Component {
         }
     };
 
-
     parseMessage = (messageText) => {
         let answers = this.state.answers;
         let template = generateTemplateString(messageText);
@@ -129,11 +125,12 @@ class ConversationComponent extends Component {
                 isLoading: true
             })
 
-            setTimeout(() => {
-                let activeMessage = Object.assign({}, this.state.messages[this.state.activeMessageNumber]);
-                let isQuestion = activeMessage.hasOwnProperty('key');
-                let nextStep = this.state.activeMessageNumber + 1;
+            let activeMessage = Object.assign({}, this.state.messages[this.state.activeMessageNumber]);
+            let isQuestion = activeMessage.hasOwnProperty('key');
+            let nextStep = this.state.activeMessageNumber + 1;
+            let delay = activeMessage.text.length * 20;
 
+            setTimeout(() => {
                 if (typeof activeMessage.text === 'string') {
                     activeMessage.text = this.parseMessage(activeMessage.text);
                 }
@@ -174,7 +171,7 @@ class ConversationComponent extends Component {
                         this.nextMessage();
                     }
                 }
-            }, 500);
+            }, delay);
         }
         else {
             this.state.log.push({
@@ -214,6 +211,9 @@ class ConversationComponent extends Component {
                                         message={message}
                                         onButtonSelect={this.handleButtonSelect} />
                         })}
+                        {this.state.isLoading && 
+                            <MessageLoading bot />
+                        }
                     </section>
                     <footer className="footer">
                         <div className="input-container">

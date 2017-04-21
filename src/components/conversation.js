@@ -128,28 +128,28 @@ class ConversationComponent extends Component {
             let activeMessage = Object.assign({}, this.state.messages[this.state.activeMessageNumber]);
             let isQuestion = activeMessage.hasOwnProperty('key');
             let nextStep = this.state.activeMessageNumber + 1;
+            let messageText = "";
+            if (typeof activeMessage.text === 'string') {
+                activeMessage.text = this.parseMessage(activeMessage.text);
+            }
+            else {
+                let targetField = activeMessage.key;
+                let targetValue = this.state.answers[targetField].toLowerCase();
+                let messageText = activeMessage.text["default"];
+
+                if (activeMessage.text.hasOwnProperty(targetValue)) {
+                    messageText = activeMessage.text[targetValue];
+                }
+                
+                activeMessage.text = this.parseMessage(messageText.message);
+
+                if (messageText.hasOwnProperty('nextStep')) {
+                    nextStep = messageText.nextStep - 1;
+                }
+            }
             let delay = activeMessage.text.length * 20;
 
             setTimeout(() => {
-                if (typeof activeMessage.text === 'string') {
-                    activeMessage.text = this.parseMessage(activeMessage.text);
-                }
-                else {
-                    let targetField = activeMessage.key;
-                    let targetValue = this.state.answers[targetField].toLowerCase();
-                    let messageText = activeMessage.text["default"];
-
-                    if (activeMessage.text.hasOwnProperty(targetValue)) {
-                        messageText = activeMessage.text[targetValue];
-                    }
-                    
-                    activeMessage.text = this.parseMessage(messageText.message);
-
-                    if (messageText.hasOwnProperty('nextStep')) {
-                        nextStep = messageText.nextStep - 1;
-                    }
-                }
-
                 this.setState({
                     activeMessage: activeMessage,
                     activeMessageNumber: nextStep,

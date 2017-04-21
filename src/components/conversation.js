@@ -70,11 +70,15 @@ class ConversationComponent extends Component {
            var userInput = {};
            userInput[activeMessage.key] = select.text;
 
+           var convoLog = this.state.log.slice();
+           convoLog.splice(-1, 1); //Remove the input message from the log
+           convoLog.push(userMessage); //Add the users' answer
+
             this.setState({
                 answers: answers,
                 userInput: '',
                 disableUserInput: true,
-                log: this.state.log.concat(userMessage)
+                log: convoLog
             });
 
             this.nextMessage(userInput);

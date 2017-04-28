@@ -7,9 +7,7 @@ class BotMessageComponent extends Component {
         return (
             <div className="message message--bot">
                 <Avatar type="bot" />
-                <div className="text">
-                    {this.props.message.text}
-                </div>
+                <div className="text" dangerouslySetInnerHTML={{__html: this.props.message.text}} />
             </div>
         );
     }

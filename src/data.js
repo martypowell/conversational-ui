@@ -9,7 +9,8 @@ var Messages = [
         text: "Now that you know me, can I get your full name?",
         sender: "bot",
         key: "fullName",
-        fieldType: "text"
+        fieldType: "text",
+        validationTypes: ['fullName']
     },
     {
         id: 3,
@@ -46,7 +47,7 @@ var Messages = [
         text: {
             "other": {
                 message: "That's sad there are no other colors I know.",
-                nextStep: 8
+                nextStep: 11
             },
             "default": {
                 message: "OMGGGGGGGGGGGGGGGGGGGG I love ${favoriteColor}. OMG OMG",
@@ -79,17 +80,38 @@ var Messages = [
     },
     {
         id: 7,
+        text: "Now that I know you even more, I understand you want to report a problem. Please briefly describe your problem below and I will try to help you with it.",
+        sender: "bot",
+        key: "serviceType",
+        fieldType: "text",
+        onSubmit: ["checkKeywords"]
+    },
+    {
+        id: 8,
+        text: "Great, I am glad to help you with your ${serviceType} Request.",
+        sender: "bot"
+    },
+    {
+        id: 9,
+        text: "An address is required to submit a service request, please type your address.",
+        sender: "bot",
+        fieldType: "text",
+        key: "addresss",
+        validationTypes: ['address'],
+        onSubmit: ["googleMap", "checkForExistingRequest"]
+    },
+    {
+        id: 10,
         text: "Well it was nice getting to know you, here is what I found out. Your name is ${fullName} and really like ${favoriteShade} ${favoriteColor}. Have a great day.",
         sender: "bot",
         isLastMessage: true
     },
     {
-        id: 8,
+        id: 11,
         text: "Well it was nice getting to know you, here is what I found out. Your name is ${fullName} and you don't really like colors. Have a great day.",
         sender: "bot",
         isLastMessage: true
     }
-    
 ];
 
 export default Messages;

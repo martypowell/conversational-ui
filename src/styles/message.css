@@ -3,7 +3,6 @@
     margin-bottom: 15px;
 }
 .message--human {
-    
     text-align: right;
 }
 
@@ -13,6 +12,7 @@
 }
 .message--bot .text {
     background-color: #f4f4f4;
+    max-width: 66%;
 }
 .message--human .text {
     background: #2c3e50;

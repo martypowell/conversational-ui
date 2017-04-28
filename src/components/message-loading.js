@@ -12,7 +12,7 @@ class MessageLoadingComponent extends Component {
             <section>
             {isBot &&
                 <div className="message message--bot">
-                <Avatar />
+                <Avatar type="bot" />
                 <MessageBlobBot>
                     <MessageLoadingIndicator>.</MessageLoadingIndicator>
                     <MessageLoadingIndicator>.</MessageLoadingIndicator>
@@ -22,7 +22,7 @@ class MessageLoadingComponent extends Component {
             }
             {!isBot &&
                 <div className="message message--human">
-                <Avatar />
+                <Avatar type="human" />
                 <MessageBlobUser>
                     <MessageLoadingIndicator>.</MessageLoadingIndicator>
                     <MessageLoadingIndicator>.</MessageLoadingIndicator>

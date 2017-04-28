@@ -1,25 +1,22 @@
+.conversation-container {
+    margin: 10px auto;
+    max-width: 700px;
+    width: 100%;
+}
 .conversation {
     font-size: 16px;
-
     position: relative;
-
     overflow-y: scroll;
-
-    max-width: 700px;
-    min-height: 500px;
-    margin: 0 auto;
+    height: 500px;
+    margin: 0;
     padding: 20px;
     padding-bottom: 60px;
 
     border: 1px solid lightgray;
 }
-.conversation .footer {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-
+.footer {
     width: 100%;
-    padding: 20px;
+    padding: 0;
 }
 .conversation .footer .input-container {
     position: relative;

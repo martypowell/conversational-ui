@@ -110,12 +110,18 @@ class ConversationComponent extends Component {
         //Answer Contains multiple responses
         let targetField = message.key;
         let targetValue = this.state.answers[targetField].toLowerCase();
-        let messageObj = message.text["default"];
+		let messageObj = message.text["default"];
+		let messageTextType = typeof message.text;
 
-        if (message.text.hasOwnProperty(targetValue)) {
-            messageObj = message.text[targetValue];
-        }
-        
+		if (messageTextType === 'function') {
+			messageObj = message.text(this.state.answers);
+		}
+		else {
+			if (message.text.hasOwnProperty(targetValue)) {
+				messageObj = message.text[targetValue];
+			}
+		}
+
         if (messageObj.hasOwnProperty('nextStep')) {
             nextStep = messageObj.nextStep - 1;
         }

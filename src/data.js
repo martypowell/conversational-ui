@@ -6,111 +6,156 @@ var Messages = [
     },
     {
         id: 2,
-        text: "Now that you know me, can I get your full name?",
+        text: "Are you a Baltimore County Resident?",
         sender: "bot",
-        key: "fullName",
-        fieldType: "text",
-        validationTypes: ['fullName']
-    },
-    {
+        key: "isResident",
+        fieldType: "radio",
+        options: [
+            {
+                text: "Yes",
+                value: 'true',
+            },
+            {
+                text: "No",
+                value: 'false'
+            }
+        ]
+	},
+	{
         id: 3,
-        text: "Thanks ${fullName}, it is nice to meet you.",
+        text: {
+            "false": {
+                message: "Sorry, you do not qualify for Spay/Neuter in Baltimore County",
+                nextStep: 10
+            },
+            "default": {
+                message: "OMGGGGGGGGGGGGGGGGGGGG Your are a resident, that's great",
+                nextStep: 4
+             }
+        },
+        key: 'isResident',
         sender: "bot"
     },
     {
         id: 4,
-        text: "Now that we are besties, what is your favorite color?",
-        sender: "bot",
-        key: "favoriteColor",
+        text: "What type of pet do you have?",
+		sender: "bot",
+		key: "petType",
         fieldType: "radio",
         options: [
-            {
-                text: "Orange",
-                value: "orange",
+			{
+                text: "Cat",
+                value: 'cat',
             },
             {
-                text: "Blue",
-                value: "blue"
-            },
-            {
-                text: "Red",
-                value: "red"
-            },
-            {
-                text: "Other",
-                value: "other"
-            }
-        ]
-    },
-    {
+                text: "Pit Bull",
+                value: 'pitbull'
+			},
+			{
+				text: "Another Type of Dog",
+                value: 'dog-other'
+			}
+		]
+	},
+	{
         id: 5,
         text: {
-            "other": {
-                message: "That's sad there are no other colors I know.",
-                nextStep: 11
+			"dog-other": {
+                message: "Oh I love dogs sooo much!!!",
+                nextStep: 8
             },
             "default": {
-                message: "OMGGGGGGGGGGGGGGGGGGGG I love ${favoriteColor}. OMG OMG",
+                message: "You own a ${petType}, that's great",
                 nextStep: 6
              }
         },
-        key: 'favoriteColor',
+        key: 'petType',
         sender: "bot"
-    },
-    {
+	},
+	{
         id: 6,
-        text: "Sorry I get really excited. Which type of ${favoriteColor} do you prefer?",
-        sender: "bot",
-        key: "favoriteShade",
+        text: "Do you receive public assistance?",
+		sender: "bot",
+		key: "receivesPublicAssistance",
         fieldType: "radio",
         options: [
-            {
-                text: "Light",
-                value: "light",
+			{
+                text: "Yes",
+                value: 'true',
             },
             {
-                text: "Regular",
-                value: "regular"
-            },
-            {
-                text: "Dark",
-                value: "dark"
+                text: "No",
+                value: 'false'
             }
-        ]
-    },
-    {
+		]
+	},
+	{
         id: 7,
-        text: "Now that I know you even more, I understand you want to report a problem. Please briefly describe your problem below and I will try to help you with it.",
-        sender: "bot",
-        key: "serviceType",
-        fieldType: "text",
-        onSubmit: ["checkKeywords"]
-    },
-    {
-        id: 8,
-        text: "Great, I am glad to help you with your ${serviceType} Request.",
+        text: {
+			"false": {
+                message: "You in fact do not receive public assistance",
+                nextStep: 8
+            },
+            "default": {
+                message: "You in fact receive public assistance.",
+                nextStep: 11
+             }
+        },
+        key: 'receivesPublicAssistance',
         sender: "bot"
-    },
-    {
-        id: 9,
-        text: "An address is required to submit a service request, please type your address.",
+	},
+	{
+		id: 8,
+        text: "What is your zip code?",
         sender: "bot",
+        key: "zipCode",
         fieldType: "text",
-        key: "addresss",
-        validationTypes: ['address'],
-        onSubmit: ["googleMap", "checkForExistingRequest"]
-    },
+        validationTypes: ['zipCode']
+	},
+	{
+        id: 9,
+        text: (answers) => {
+			const zip = answers.zipCode ? parseInt(answers.zipCode) : null;
+			const dundalkCenterZips = [21222, 21219, 21220, 21221, 21224, 21237];
+			const zipIsInDundalkZips = dundalkCenterZips.indexOf(zip) > -1;
+			const nextStep = 10;
+
+			if (zipIsInDundalkZips) {
+				return {
+					message: "Congrats you are qualified for a free procedure for your ${petType} at one of our Dundalk Centers. <a href='https://clinichq.com/online/144afb8f-6c15-4f15-8e16-9417a4f85823'>Register</a> now",
+					nextStep: nextStep
+				};
+			}
+
+			const swapCenterZips = [21227, 21228, 21244, 21207];
+			const isCat = answers.petType ? answers.petType.toLowerCase().indexOf('cat') > -1 : false;
+			const zipIsInSwapZips = swapCenterZips.indexOf(zip) > -1;
+			if (isCat && zipIsInSwapZips) {
+				return {
+					message: "Congrats you are qualified for a free procedure for your ${petType} at one of our SWAP Centers.",
+					nextStep: nextStep
+				};
+			}
+					
+			return {
+				message: "Congrats you are qualified for a $20 procedure at any of our locations.",
+				nextStep: nextStep
+			};
+		},
+        key: 'zipCode',
+        sender: "bot"
+	},
     {
         id: 10,
-        text: "Well it was nice getting to know you, here is what I found out. Your name is ${fullName} and really like ${favoriteShade} ${favoriteColor}. Have a great day.",
-        sender: "bot",
-        isLastMessage: true
-    },
-    {
+        text: "Have a nice day :)",
+		sender: "bot",
+		isLastMessage: true
+	},
+	{
         id: 11,
-        text: "Well it was nice getting to know you, here is what I found out. Your name is ${fullName} and you don't really like colors. Have a great day.",
-        sender: "bot",
-        isLastMessage: true
+        text: "Well, I have some great news, you qualify for a free procedure at any of our locations.",
+		sender: "bot",
+		isLastMessage: true
     }
 ];
 
